@@ -1,0 +1,400 @@
+// this file compiles using the ScriptingRT library, which is available at http://reactiontimes.wordpress.com/scriptingrt/
+// the ActionScript code included here randomizes the test items
+// the rest of the code follows the guidelines put forth in the ScriptingRT instructions
+
+<?xml version="1.0" encoding="utf-8"?>
+<Application xmlns="org.nad.dm.*" 
+				xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   	xmlns:mx="library://ns.adobe.com/flex/mx"
+			   	xmlns:gfx="org.nad.dm.gfx.*"
+			   	backgroundColor="0x007799" layout="absolute" 
+				width="100%" height="100%"
+				debug="false"
+				outputURL="http://ec2-23-22-34-206.compute-1.amazonaws.com/KellyQP/Results/scriptingrt.php?test=ListA&amp;version=0.1&amp;type=csv.append"
+				protocolFormatHead="%serverUploadTime%,%clientUploadTime%,%clientIP%"
+				protocolFormatItem="%itemID%,%response%,%responseTime%"
+                finishedButtonValue="All finished! Your survey code is {surveyCode}"
+                creationComplete="setBranches();">
+    
+    
+    <fx:Script>
+		<![CDATA[
+            
+			// import flash.external.ExternalInterface;
+			[Bindable] public var surveyCode:Number = Math.floor(Math.random()*10000)+1000;
+
+            // This import statement allows you to write debug lines to the firebug console
+            // import flash.external.ExternalInterface;
+            
+            // This is the number of test parts you have
+            [Bindable] public var numTestParts : Number = 3;
+
+            // This is the array that holds even numbers 2, 4, 6 .... n
+            [Bindable] public var testPartsTaken : Array = [];
+            
+            // This is the counter that is incremented each time a test part is run. It steps through the array
+            [Bindable] public var testPartCounter : Number = 0;
+            
+            // This is the array of randomized test parts
+            [Bindable] public var randomizedArray:Array = [];
+
+            // This is a dummy boolean that flips back and forth because branches are called twice for some reason
+            [Bindable] public var branchHasBeenTaken : Boolean = false;
+            
+            
+            // This function is called when the program runs. It randomizes the test part array.
+            public function setBranches():void {
+            
+            // This is how you output debug statments to the firebug screen. it can be deleted in the real program
+            //ExternalInterface.call("eval","console.warn('setBranches')");
+            
+            // This loop picks a random index in the test part array, removes that value, and puts it in the randomized array.
+            // It runs through the whole array. the "splice" function does a removal from the one array and the "push" function
+            // puts it in the other array
+            var i:int;
+            for(i=1; i<=numTestParts; i++)
+            testPartsTaken.push(i*2);
+            randomizedArray = [];
+            while (testPartsTaken.length > 0) {
+            randomizedArray.push(testPartsTaken.splice(Math.round(Math.random() * (testPartsTaken.length - 1)), 1)[0]);
+            }
+			}
+            
+            // This is the branching function. The first part makes sure it doesn't do anything the first of 2 times it's called'
+            public function branchToRandomTestPart(items:Object) : Boolean{
+            if(branchHasBeenTaken)
+            {
+            branchHasBeenTaken = false;            
+            }
+            else
+            {
+            branchHasBeenTaken = true;
+            return false;
+            }
+            
+            //ExternalInterface.call("eval","console.warn('branch items count " + items.count + "')");
+            
+            // This just steps through the randomized array and sets the "next" test part to whichever number it finds.
+            // Test parts must all be named testPart followed by an even number for this to work.
+            if(testPartCounter < randomizedArray.length)
+            {
+            //ExternalInterface.call("eval","console.warn('branch " + randomizedArray[testPartCounter] + "')");
+            nextTestPart.next = "testPart" + randomizedArray[testPartCounter++];
+            }
+            else
+            {
+            
+            nextTestPart.next = "end";
+            }
+            return true;
+            
+            }
+            
+            // This function forces the branch to test part 1.
+            public function branchGoToRandomTestPart(items:Object) : Boolean{
+            //ExternalInterface.call("eval","console.warn('branch go to random test part items count=" + items.count + " correct=" + items.correct + "')");
+            if(items.count == 2)
+            {
+                return true;
+            }
+            if(items.correct == 1)
+            {
+                return true;
+            }
+            else
+            {
+            return false;
+            }
+
+            }
+            
+		]]>
+	</fx:Script>
+    
+    
+	<WelcomeScreen id="welcome" Title="RT sample - will it work??" titleTop="120" titleAlignment="center" titleColor="0xFF9900" backgroundColor="0x113300" Logo="" logoTop="20" logoAlignment="center"/>
+    
+    <Part id="instructionPart" response="keyboard.space.release" backgroundColor="0" color="0xFF9933" fontSize="16">
+		<Instruction id="instructionPage2" name="instruction1">
+			<instruction>
+                Read the following sentences,
+                one word at a time,
+                pressing SPACE after each word
+                to move on to the next word.
+                After each word-by-word sentence,
+                you will see a yes/no question.
+                For yes/no questions, press
+                "Y" for yes and "N" for no.
+                Try to read at a natural pace;
+                quickly, but with comprehension.
+                Press SPACE.
+            </instruction>
+		</Instruction>
+	</Part>
+    
+    <!-- could this just be a Part? -->
+    <TestPart id="testPart1" response="Time.500" backgroundColor="0"  color="0xFFFFFF" fontSize="16">
+        <branches>
+            <Branch next="" operation="branchToRandomTestPart" id="nextTestPart"/>
+        </branches>
+        <Item id="blankItem" response="Time.5">
+			<Frame id="blankFrame" response="Time.5"/>
+		</Item>
+    </TestPart> 
+
+	<TestPart id="testPart2" response="keyboard.space.press" backgroundColor="0"  color="0xFFFFFF" fontSize="16">
+		<Item id="Item01_CondA_WH1" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="Which"/>
+			</Frame>
+		</Item>
+	
+		<Item id="Item01_CondA_WH2" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="events"/>
+			</Frame>
+		</Item>
+	
+		<Item id="Item01_CondA_aux" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="was"/>
+			</Frame>
+		</Item>
+	
+		<Item id="Item01_CondA_SU1" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="the"/>
+			</Frame>
+		</Item>
+	
+		<Item id="Item01_CondA_SU2" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="reporter"/>
+			</Frame>
+		</Item>
+	
+		<Item id="Item01_CondA_V" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="describing"/>
+			</Frame>
+		</Item>
+	
+		<Item id="Item01_CondA_V1" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="with"/>
+			</Frame>
+		</Item>
+
+		<Item id="Item01_CondA_V2" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="great"/>
+			</Frame>
+		</Item>
+
+		<Item id="Item01_CondA_end" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="haste?"/>
+			</Frame>
+		</Item>
+	</TestPart>
+
+   	<TestPart id="testPart3" positive="keyboard.Y.press" negative="keyboard.N.press" backgroundColor="0"  color="0xFFFFFF" fontSize="16">
+		<repeat>
+			<Feedback id="feedback1" backgroundColor="#002266" response="Time.2000" >
+			<!--<correct>
+					<mx:Text verticalCenter="0" horizontalCenter="0" text="correct %responseTime% ms"/>
+				</correct>-->
+				<incorrect>
+					<mx:Text verticalCenter="0" horizontalCenter="0" text="Incorrect. Please slow down."/>
+				</incorrect>
+				<!--<miss>
+					<mx:Text verticalCenter="0" horizontalCenter="0" text="too slow"/>
+				</miss>-->
+			</Feedback>
+		</repeat>
+        <branches>
+            <Branch next="testPart1" operation="branchGoToRandomTestPart"/>
+        </branches>
+		<Item id="Item01_CondA_Q" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="Did the reporter see what happened?"/>
+			</Frame>
+		</Item>
+        <Item id="blankItem1" response="Time.5">
+			<Frame id="blankFrame1" response="Time.5"/>
+		</Item>
+	</TestPart>
+    
+    <TestPart id="testPart4" response="keyboard.space.press" backgroundColor="0"  color="0xFFFFFF" fontSize="16">
+		<Item id="Item02_CondB_WH1" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="Which"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item02_CondB_WH2" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="product"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item02_CondB_aux" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="were"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item02_CondB_SU1" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="the"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item02_CondB_SU2" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="advertisers"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item02_CondB_V" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="promoting"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item02_CondB_V1" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="throughout"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item02_CondB_V2" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="the"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item02_CondB_end" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="show?"/>
+			</Frame>
+		</Item>
+	</TestPart>
+    
+   	<TestPart id="testPart5" positive="keyboard.Y.press" negative="keyboard.N.press" backgroundColor="0"  color="0xFFFFFF" fontSize="16">
+		<repeat>
+			<Feedback id="feedback2" backgroundColor="#002266" response="Time.2000" >
+				<!--<correct>
+					<mx:Text verticalCenter="0" horizontalCenter="0" text="correct %responseTime% ms"/>
+				</correct>-->
+				<incorrect>
+					<mx:Text verticalCenter="0" horizontalCenter="0" text="Incorrect. Please slow down"/>
+				</incorrect>
+				<!--<miss>
+					<mx:Text verticalCenter="0" horizontalCenter="0" text="too slow"/>
+				</miss>-->
+			</Feedback>
+		</repeat>
+        <branches>
+            <Branch next="testPart1" operation="branchGoToRandomTestPart"/>
+        </branches>
+		<Item id="Item02_CondB_Q" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="Did the show sell commercial slots?"/>
+			</Frame>
+		</Item>
+        <Item id="blankItem2" response="Time.5">
+			<Frame id="blankFrame2" response="Time.5"/>
+		</Item>
+	</TestPart>
+    
+    <TestPart id="testPart6" response="keyboard.space.press" backgroundColor="0"  color="0xFFFFFF" fontSize="16">
+		<Item id="Item03_CondC_WH1" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="Which"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item03_CondC_WH2" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="building"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item03_CondC_aux" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="were"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item03_CondC_SU1" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="the"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item03_CondC_SU2" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="architects"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item03_CondC_V" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="featuring"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item03_CondC_V1" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="in"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item03_CondC_V2" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="the"/>
+			</Frame>
+		</Item>
+        
+		<Item id="Item03_CondC_end" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="portfolio?"/>
+			</Frame>
+		</Item>
+	</TestPart>
+    
+   	<TestPart id="testPart7" positive="keyboard.Y.press" negative="keyboard.N.press" backgroundColor="0"  color="0xFFFFFF" fontSize="16">
+		<repeat>
+			<Feedback id="feedback3" backgroundColor="#002266" response="Time.2000" >
+				<!--<correct>
+					<mx:Text verticalCenter="0" horizontalCenter="0" text="correct %responseTime% ms"/>
+				</correct>-->
+				<incorrect>
+					<mx:Text verticalCenter="0" horizontalCenter="0" text="Incorrect. Please slow down."/>
+				</incorrect>
+				<!--<miss>
+					<mx:Text verticalCenter="0" horizontalCenter="0" text="too slow"/>
+				</miss>-->
+			</Feedback>
+		</repeat>
+        <branches>
+            <Branch next="testPart1" operation="branchGoToRandomTestPart"/>
+        </branches>
+		<Item id="Item03_CondC_Q" type="+">
+			<Frame>
+				<mx:Text horizontalCenter="0" verticalCenter="0" text="Did the architects have a portfolio?"/>
+			</Frame>
+		</Item>
+        <Item id="blankItem3" response="Time.500">
+			<Frame id="blankFrame3" response="Time.500"/>
+		</Item>
+	</TestPart>
+    
+	<Part id="end" response="keyboard.space.release" backgroundColor="0" color="0xFF9933" auto="false" fontSize="16">
+		<Instruction id="endinstruction">
+			<instruction>Done! Press SPACE to save data and get survey code.</instruction>
+		</Instruction>
+	</Part>
+    
+</Application>
