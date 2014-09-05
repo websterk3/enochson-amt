@@ -1,6 +1,10 @@
-// this file compiles using the ScriptingRT library, which is available at http://reactiontimes.wordpress.com/scriptingrt/
-// the ActionScript code included here randomizes the test items
-// the rest of the code follows the guidelines put forth in the ScriptingRT instructions
+// This code was written by Kelly Enochson at George Mason University. 
+// It uses ScriptingRT software to implement a self-paced reading task for use on Amazon Mechanical Turk.
+
+// This file compiles using the ScriptingRT library, which is available at http://reactiontimes.wordpress.com/scriptingrt/
+// The corresponding compiled flash video is included in this repository as flash_sample.swf.
+// The ActionScript code included here randomizes the test items.
+// The rest of the code follows the guidelines put forth in the ScriptingRT instructions.
 
 <?xml version="1.0" encoding="utf-8"?>
 <Application xmlns="org.nad.dm.*" 
