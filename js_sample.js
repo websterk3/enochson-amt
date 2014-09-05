@@ -1,3 +1,9 @@
+// This code was written by Kelly Enochson at George Mason University.
+// Thanks to Chris Callison-Burch at Penn for some of the code used in these functions.
+// These two functions instantiate a self-paced reading task for use on Amazon Mechanical Turk.
+// The function doInitialize() should be called for each new test item. 
+// The function doTimer() is called with each key press, i.e., each word.
+
 // global variables
 
 var results = [];
